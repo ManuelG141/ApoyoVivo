@@ -1,0 +1,29 @@
+{
+  "name": "apoyovivo",
+  "version": "1.0.0",
+  "description": "A repository with all the content of the project ApoyoVivo for the Huawei ICT Competition 2024–2025",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev --env-file .env src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ManuelG141/ApoyoVivo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ManuelG141/ApoyoVivo/issues"
+  },
+  "homepage": "https://github.com/ManuelG141/ApoyoVivo#readme",
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/morgan": "^1.9.9",
+    "express": "^4.21.2",
+    "morgan": "^1.10.0",
+    "pg": "^8.14.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.2"
+  }
+}
