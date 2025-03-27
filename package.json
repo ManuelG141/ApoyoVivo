@@ -25,5 +25,8 @@
     "pg": "^8.14.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "apoyovivo": "file:"
   }
 }
