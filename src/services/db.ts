@@ -8,7 +8,7 @@ const pool = new pg.Pool({
   database: process.env.DB
 })
 
-export const sendQuery = async (query: string, values: any[]): Promise<object> => {
+export const sendQuery = async (query: string, values: any[]): Promise<any> => {
   const client = await pool.connect() // Connect to DB
   const result = await client.query(query, values)
   client.release()

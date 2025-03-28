@@ -41,6 +41,8 @@ export const loginSchema = z.object({
     message: 'Password must be at least 6 characters'
   }).max(20, {
     message: 'Password must not exceed 20 characters'
+  }).regex(/^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]+$/, {
+    message: 'Password must contain at least one uppercase letter and one number'
   })
 })
 
