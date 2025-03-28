@@ -1,34 +1,22 @@
 import { Router } from 'express'
+import * as authServices from '../services/authServices'
+
+import { validateSchema } from '../middlewares/authValidator'
+import { registerSchema, loginSchema } from '../schemas/auth'
 
 const router = Router()
 
-router.post('/register', (_req, res) => {
-  res.send('Register')
-})
+router.post('/register', validateSchema(registerSchema), authServices.registerUser)
 
-router.post('/login', (_req, res) => {
-  res.send('Login')
-})
+router.post('/login', validateSchema(loginSchema), authServices.loginUser)
 
-router.delete('/logout', (_req, res) => {
-  res.send('Logout')
-})
+router.delete('/logout', authServices.logoutUser)
 
-router.post('/profile', (_req, res) => {
-  res.send('Profile Post')
-})
+router.get('/profile', authServices.getUserProfile)
 
-router.get('/profile', (_req, res) => {
-  res.send('Profile Get')
-})
+router.put('/profile', authServices.updateUserProfile)
 
-router.put('/profile', (_req, res) => {
-  res.send('Profile Put')
-})
-
-router.delete('/profile', (_req, res) => {
-  res.send('Profile Delete')
-})
+router.delete('/profile', authServices.deleteUserProfile)
 
 router.get('/verify', (_req, res) => {
   res.send('Verify')
