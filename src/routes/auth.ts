@@ -18,8 +18,6 @@ router.put('/profile', authServices.updateUserProfile)
 
 router.delete('/profile', authServices.deleteUserProfile)
 
-router.get('/verify', (_req, res) => {
-  res.send('Verify')
-})
+router.get('/verify', authServices.verifyUserToken)
 
 export default router

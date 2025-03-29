@@ -1,10 +1,12 @@
 import { Request, Response } from 'express'
-import { sendQuery } from './db'
-import { newUserType, loginUserType } from '../types/authTypes'
 import { hashSync, compareSync } from 'bcrypt-ts'
+import { sendQuery } from './db'
+import { newUserType, loginUserType, UserRole } from '../types/authTypes'
+import { createAccessToken, verifyToken } from './jwt'
 
 export const registerUser = async (req: Request<any>, res: Response<any>): Promise<void> => {
   const user: newUserType = {
+    role: UserRole.user, // Default role is user
     username: req.body.username,
     email: req.body.email,
     password: req.body.password
@@ -13,11 +15,13 @@ export const registerUser = async (req: Request<any>, res: Response<any>): Promi
   const hashedPassword = hashSync(user.password, 10) // Generate Salt And Hash
 
   try {
-    const query = 'INSERT INTO "users" (username, email, hashed_password) VALUES ($1, $2, $3);'
-    const values = [user.username, user.email, hashedPassword] // Values to insert into DB
-    await sendQuery(query, values)
+    const query = 'INSERT INTO "users" (role, username, email, hashed_password) VALUES ($1, $2, $3, $4) RETURNING id;'
+    const values = [user.role, user.username, user.email, hashedPassword]
+    const result = await sendQuery(query, values)
 
-    console.log('User Registed...')
+    const token = createAccessToken(result[0]) // Create JWT token
+
+    res.cookie('token', token, {})
     res.status(200).send('User registered')
   } catch (error: any) {
     if (error.code === '23505') {
@@ -36,7 +40,7 @@ export const loginUser = async (req: Request<any>, res: Response<any>): Promise<
   } // After Schema Validation, store validated user info
 
   try {
-    const query = 'SELECT hashed_password FROM users WHERE email = $1;'
+    const query = 'SELECT hashed_password, id, username, role FROM users WHERE email = $1;'
     const values = [user.email] // Values to insert into DB
     const result = await sendQuery(query, values)
 
@@ -51,8 +55,20 @@ export const loginUser = async (req: Request<any>, res: Response<any>): Promise<
       return
     }
 
-    console.log('User Logged In...')
-    res.status(200).send('User Logged In')
+    const payload: any = {
+      id: result[0].id
+    }
+    const token = createAccessToken(payload) // Create JWT token
+    res.cookie('token', token, {
+    })
+
+    const userData: any = {
+      id: result[0].id,
+      username: result[0].username,
+      role: result[0].role
+    }
+
+    res.status(200).send(userData)
   } catch (error: any) {
     console.log(error)
     res.status(500).send('Internal server error ' + (error.detail as string))
@@ -60,7 +76,10 @@ export const loginUser = async (req: Request<any>, res: Response<any>): Promise<
 }
 
 export const logoutUser = async (_req: Request<any>, res: Response<any>): Promise<void> => {
-  console.log('User Logged Out...')
+  // Elimina la cookie del token estableciendo su expiración en una fecha pasada
+  res.cookie('token', '', {
+    expires: new Date(0)
+  })
   res.status(200).send('User Logged Out')
 }
 
@@ -79,4 +98,14 @@ export const updateUserProfile = async (req: Request<any>, res: Response<any>): 
 export const deleteUserProfile = async (_req: Request<any>, res: Response<any>): Promise<void> => {
   console.log('Profile Deleted...')
   res.status(200).send('Profile Updated')
+}
+
+export const verifyUserToken = async (req: Request<any>, res: Response<any>): Promise<void> => {
+  const { token } = req.cookies
+  try {
+    const user = await verifyToken(token) // Verify token
+    res.status(200).send(user)
+  } catch (error: any) {
+    res.status(403).send(error.message)
+  }
 }

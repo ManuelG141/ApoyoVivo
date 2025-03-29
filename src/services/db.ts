@@ -20,13 +20,15 @@ async function createTable (): Promise<void> {
   const client = await pool.connect()
   await client.query(`
     CREATE TABLE IF NOT EXISTS "users" (
-        id SERIAL PRIMARY KEY,
+        id UUID DEFAULT gen_random_uuid (),
         name VARCHAR(20),
         streak INT DEFAULT 1,
+        role VARCHAR(10) DEFAULT 'user',
         username VARCHAR(20) NOT NULL UNIQUE,
         email VARCHAR(100) NOT NULL UNIQUE,
         hashed_password VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id)
     );
   `)
   client.release()
