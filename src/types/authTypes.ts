@@ -1,18 +1,18 @@
-export enum UserRole {
+export enum userRole {
   user = 'user',
   admin = 'admin'
 }
-
-export interface User {
+export interface user {
   id: number
   name: string
   streak: number
-  role: UserRole
+  role: userRole
   username: string
   email: string
   password: string
   createdAt: Date
 }
 
-export type newUserType = Omit<User, 'id' | 'name' | 'createdAt' | 'streak'>
-export type loginUserType = Pick<User, 'email' | 'password'>
+export type newUserType = Omit<user, 'id' | 'name' | 'createdAt' | 'streak'>
+export type loginUserType = Pick<user, 'email' | 'password'>
+export type userWithoutPassword = Omit<user, 'password'>

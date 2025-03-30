@@ -1,12 +1,12 @@
 import { Request, Response } from 'express'
 import { hashSync, compareSync } from 'bcrypt-ts'
 import { sendQuery } from './db'
-import { newUserType, loginUserType, UserRole } from '../types/authTypes'
+import { newUserType, loginUserType, userRole, userWithoutPassword } from '../types/authTypes'
 import { createAccessToken, verifyToken } from './jwt'
 
 export const registerUser = async (req: Request<any>, res: Response<any>): Promise<void> => {
   const user: newUserType = {
-    role: UserRole.user, // Default role is user
+    role: userRole.user, // Default role is user
     username: req.body.username,
     email: req.body.email,
     password: req.body.password
@@ -104,7 +104,27 @@ export const verifyUserToken = async (req: Request<any>, res: Response<any>): Pr
   const { token } = req.cookies
   try {
     const user = await verifyToken(token) // Verify token
-    res.status(200).send(user)
+
+    const query = 'SELECT name, streak, role, username, email, created_at FROM users WHERE id = $1;'
+    const values = [user.id] // Values to insert into DB
+    const result = await sendQuery(query, values)
+
+    if (result.length === 0) { // Check if user exists
+      res.status(401).send('Id was not found')
+      return
+    }
+
+    const userData: userWithoutPassword = {
+      id: user.id,
+      name: result[0].name,
+      streak: result[0].streak,
+      role: result[0].role,
+      username: result[0].username,
+      email: result[0].email,
+      createdAt: result[0].created_at
+    }
+
+    res.status(200).send(userData)
   } catch (error: any) {
     res.status(403).send(error.message)
   }
