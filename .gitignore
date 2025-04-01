@@ -2,3 +2,4 @@
 node_modules
 start_package.sh
 db.sql
+cors_config.ts
