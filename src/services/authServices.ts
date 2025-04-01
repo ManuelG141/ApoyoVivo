@@ -30,7 +30,7 @@ export const registerUser = async (req: Request<any>, res: Response<any>): Promi
     res.status(200).send('User registered')
   } catch (error: any) {
     if (error.code === '23505') {
-      res.status(409).send(error.detail) // Conflict
+      res.status(409).send({ general: error.detail }) // Conflict
     } else {
       console.log(error)
       res.status(500).send('Internal server error ' + (error.detail as string))

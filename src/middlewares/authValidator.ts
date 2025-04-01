@@ -5,6 +5,10 @@ export const validateSchema = (schema: any) => (req: Request<any>, res: Response
     schema.parse(req.body)
     next()
   } catch (error: any) {
-    res.status(400).send(error.issues)
+    const errors: Record<string, string> = {}
+    for (const issue of error.issues) {
+      errors[issue.path] = issue.message
+    }
+    res.status(400).send(errors)
   }
 }
