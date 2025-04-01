@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { hashSync, compareSync } from 'bcrypt-ts'
+import { hash, compare } from 'bcrypt-ts'
 import { sendQuery } from './db'
 import { newUserType, loginUserType, userRole, userWithoutPassword } from '../types/authTypes'
 import { createAccessToken, verifyToken } from './jwt'
@@ -12,7 +12,7 @@ export const registerUser = async (req: Request<any>, res: Response<any>): Promi
     password: req.body.password
   } // After Schema Validation, store validated user info
 
-  const hashedPassword = hashSync(user.password, 10) // Generate Salt And Hash
+  const hashedPassword = await hash(user.password, 10) // Generate Salt And Hash
 
   try {
     const query = 'INSERT INTO "users" (role, username, email, hashed_password) VALUES ($1, $2, $3, $4) RETURNING id;'
@@ -21,7 +21,12 @@ export const registerUser = async (req: Request<any>, res: Response<any>): Promi
 
     const token = createAccessToken(result[0]) // Create JWT token
 
-    res.cookie('token', token, {})
+    res.cookie('access_token', token, {
+      httpOnly: true, // The cookie is not accessible via JavaScript
+      secure: false, // The cookie is only sent over HTTPS
+      sameSite: 'strict', // The cookie is only sent for same-site requests
+      maxAge: 1000 * 60 * 60 // 1 hour, same as the token expiration time
+    })
     res.status(200).send('User registered')
   } catch (error: any) {
     if (error.code === '23505') {
@@ -49,7 +54,7 @@ export const loginUser = async (req: Request<any>, res: Response<any>): Promise<
       return
     }
 
-    const isPasswordValid = compareSync(user.password, result[0].hashed_password)
+    const isPasswordValid = await compare(user.password, result[0].hashed_password)
     if (!isPasswordValid) { // Check if password is valid
       res.status(401).send('Invalid password')
       return
@@ -59,7 +64,11 @@ export const loginUser = async (req: Request<any>, res: Response<any>): Promise<
       id: result[0].id
     }
     const token = createAccessToken(payload) // Create JWT token
-    res.cookie('token', token, {
+    res.cookie('access_token', token, {
+      httpOnly: true, // The cookie is not accessible via JavaScript
+      secure: false, // The cookie is only sent over HTTPS
+      sameSite: 'strict', // The cookie is only sent for same-site requests
+      maxAge: 1000 * 60 * 60 // 1 hour, same as the token expiration time
     })
 
     const userData: any = {
@@ -77,7 +86,7 @@ export const loginUser = async (req: Request<any>, res: Response<any>): Promise<
 
 export const logoutUser = async (_req: Request<any>, res: Response<any>): Promise<void> => {
   // Elimina la cookie del token estableciendo su expiración en una fecha pasada
-  res.cookie('token', '', {
+  res.cookie('access_token', '', {
     expires: new Date(0)
   })
   res.status(200).send('User Logged Out')
@@ -101,7 +110,7 @@ export const deleteUserProfile = async (_req: Request<any>, res: Response<any>):
 }
 
 export const verifyUserToken = async (req: Request<any>, res: Response<any>): Promise<void> => {
-  const { token } = req.cookies
+  const { access_token: token } = req.cookies
   try {
     const user = await verifyToken(token) // Verify token
 

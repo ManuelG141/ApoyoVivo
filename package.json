@@ -20,6 +20,7 @@
   "homepage": "https://github.com/ManuelG141/ApoyoVivo#readme",
   "dependencies": {
     "@types/cookie-parser": "1.4.8",
+    "@types/cors": "2.8.17",
     "@types/express": "5.0.1",
     "@types/jsonwebtoken": "9.0.9",
     "@types/morgan": "1.9.9",
@@ -27,6 +28,7 @@
     "apoyovivo": "file:",
     "bcrypt-ts": "6.0.0",
     "cookie-parser": "1.4.7",
+    "cors": "2.8.5",
     "express": "4.21.2",
     "jsonwebtoken": "9.0.2",
     "morgan": "1.10.0",

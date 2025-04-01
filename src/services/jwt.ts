@@ -5,7 +5,7 @@ export const createAccessToken = (payload: string): string => {
     payload,
     process.env.TOKEN_SECRET as Secret,
     // eslint-disable-next-line @typescript-eslint/quotes
-    { expiresIn: "1d" } // 1 day expiration
+    { expiresIn: "1h" } // 1 hour expiration
   )
   return token
 }
